@@ -58,7 +58,9 @@ observability-stack/
 │   └── prometheus-app.yaml
 ├── README.md             # This file
 └── observability_deployment_steps.docx  # Full step-by-step guide
-⚙️ Deployment Instructions
+
+
+## ⚙️ Deployment Instructions
 
 📎 Prerequisites
 A Kubernetes cluster
@@ -101,18 +103,20 @@ RBAC
 kubectl apply -f rbac/observability-rbac.yaml
 Network Policy
 kubectl apply -f network-policies/restrict-ns-traffic.yaml
-🚨 Alerts (Optional)
+
+## 🚨 Alerts (Optional)
 
 kubectl create configmap cpu-alerts \
   --from-file=alerts/high-cpu.yaml -n observability
 
 kubectl label configmap cpu-alerts role=alert-rules -n observability
-🔄 GitOps with ArgoCD (Optional)
+
+## 🔄 GitOps with ArgoCD (Optional)
 
 kubectl apply -f argocd/prometheus-app.yaml
 Once applied, ArgoCD will monitor the Git repository and keep Prometheus deployments in sync.
 
-✅ Validation
+##✅ Validation
 
 kubectl get pods -n observability
 Ensure all observability components (prometheus, grafana, loki, fluent-bit) are running.
