@@ -1,0 +1,90 @@
+Deployment Guide: Scalable & Secure Observability Stack on Kubernetes
+Prerequisites
+- A running Kubernetes cluster with kubectl configured
+- Helm installed (`helm version`)
+- Admin access to the cluster (for creating namespaces, RBAC, etc.)
+- (Optional) ArgoCD installed for GitOps
+Project Structure
+observability-stack/
+├── charts/
+│   ├── prometheus/
+│   │   └── values.yaml
+│   ├── loki/
+│   │   └── values.yaml
+│   ├── grafana/
+│   │   └── values.yaml
+│   └── fluent-bit/
+│       └── values.yaml
+├── rbac/
+│   └── observability-rbac.yaml
+├── network-policies/
+│   └── restrict-ns-traffic.yaml
+├── alerts/
+│   └── high-cpu.yaml
+├── argocd/
+│   └── prometheus-app.yaml
+└── observability_deployment_steps.docx
+      
+  Step 1: Clone Repo / Setup Directory
+      git clone https://github.com/your-org/observability-stack.git
+      cd observability-stack
+
+  Step 2: Create Namespace
+      kubectl create namespace observability
+      kubectl label namespace observability access=observability
+
+  Step 3: Add Helm Repositories
+      helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+      helm repo add grafana https://grafana.github.io/helm-charts
+      helm repo add fluent https://fluent.github.io/helm-charts
+      helm repo update
+      
+  Step 4: Install Prometheus
+      helm install prometheus prometheus-community/kube-prometheus-stack \
+      -f charts/prometheus/values.yaml \
+      -n observability
+      
+  Step 5: Install Loki
+      helm install loki grafana/loki \
+      -f charts/loki/values.yaml \
+      -n observability
+      
+  Step 6: Install Fluent Bit
+      helm install fluent-bit fluent/fluent-bit \
+      -f charts/fluent-bit/values.yaml \
+      -n observability
+      
+  Step 7: Install Grafana
+      helm install grafana grafana/grafana \
+      -f charts/grafana/values.yaml \
+      -n observability
+      
+      # Port forward Grafana for local access
+      kubectl port-forward svc/grafana 3000:80 -n observability
+      
+      # Access: http://localhost:3000 (admin/admin or set password)
+   
+  Step 8: Apply RBAC Policies
+      kubectl apply -f rbac/observability-rbac.yaml
+      
+  Step 9: Apply Network Policies
+      kubectl apply -f network-policies/restrict-ns-traffic.yaml
+      
+  Step 10: Load Alert Rules (Optional)
+      kubectl create configmap cpu-alerts \
+      --from-file=alerts/high-cpu.yaml \
+      -n observability
+      
+      kubectl label configmap cpu-alerts role=alert-rules -n observability
+      
+  Step 11: GitOps with ArgoCD (Optional)
+      kubectl apply -f argocd/prometheus-app.yaml
+      Verification
+      # Check components
+      kubectl get pods -n observability
+
+# Ensure Prometheus, Grafana, Loki, Fluent Bit pods are running
+
+# Access Grafana UI:
+- Visit http://localhost:3000
+- Use imported dashboards to view metrics/logs
