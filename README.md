@@ -60,7 +60,8 @@ observability-stack/
 └── observability_deployment_steps.docx  # Full step-by-step guide
 
 
-**## ⚙️ Deployment Instructions**
+## ⚙️ Deployment Instructions
+
 
 📎 Prerequisites
 A Kubernetes cluster
